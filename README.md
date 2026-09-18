@@ -8,29 +8,29 @@
 
 > **Purpose: validating the work on my resume ahead of publication.**
 > This repository backs the claims in my resume entry **Systems & AI Research Intern
-> (Medical Image Processing), Indian Institute of Technology (IIT) Patna, May 2026 â€“
+> (Medical Image Processing), Indian Institute of Technology (IIT) Patna, May 2026 –
 > present**. The manuscript (targeted at *IEEE TMI*) is not yet published, so the core
-> method is ðŸ”’ **withheld under lab confidentiality**. The code around it is here so the
+> method is 🔒 **withheld under lab confidentiality**. The code around it is here so the
 > work can be checked: architecture, baselines, evaluation and statistics code,
 > tractography and HPC pipelines.
 
 **QSSM** is a state-space (Mamba-style) encoder for free-water estimation from diffusion
 MRI. It models the diffusion signal **across gradient directions (q-space)** as well as
-across the image. It builds on **RDT-Net**, a hybrid Vision Transformer + reactionâ€“diffusion
+across the image. It builds on **RDT-Net**, a hybrid Vision Transformer + reaction–diffusion
 PDE network, and cuts parameters by **18.9%** and FLOPs by **12.2%** compared with it.
 
-## Resume claims â†’ evidence
+## Resume claims → evidence
 
 | Resume claim | Evidence in this repo | How to check |
 |---|---|---|
-| **RDT-Net**: hybrid ViT + reactionâ€“diffusion PDE framework for noise-robust free-water quantification | âœ… full model and trainer: [`rdtnet_baseline/`](rdtnet_baseline), [`qssm/models/rdt_net.py`](qssm/models/rdt_net.py), [`global_layer_rxn_diff.py`](qssm/models/global_layer_rxn_diff.py) | `python qssm/tests/test_shapes.py` builds it (509,383 params) |
-| RDT-Net accuracy vs classical AMICO fitting | ðŸ“„ evaluation code present: [`qssm/evaluate/`](qssm/evaluate) | numbers reported in the manuscript |
-| **QSSM**: 509K â†’ 413K parameters (âˆ’18.9%), âˆ’12.2% FLOPs | ðŸ”’ encoder withheld; the 2Ã—2 design, cost benchmark and parameter budget are documented: [`docs/architecture.md`](docs/architecture.md), [`qssm/efficiency/`](qssm/efficiency) | `python qssm/efficiency/bench.py --cpu-only` (reproduces all four arms on the full code) |
-| QSSM beats the ViT baseline in a 2Ã—2 ablation (Wilcoxon) | âœ… statistics protocol: [`qssm/stats/stats.py`](qssm/stats/stats.py) (exact Wilcoxon, 2Ã—2 interaction, TOST, Holm) | p-values reported in the manuscript |
-| **Automated bundle segmentation** with TractSeg from FODs | âœ… complete pipelines: [`tractography/`](tractography) (FW correction â†’ SS3T-CSD â†’ TractSeg bundles, endings, TOMs) | runs on any HCP-style subject |
-| **Data scale & optimisation**: SLURM processing, adaptive-compute controller | âœ… SLURM array jobs, preprocessing, SNR-conditioned iteration controller: [`hpc/`](hpc) | throughput figures reported in the manuscript |
+| **RDT-Net**: hybrid ViT + reaction–diffusion PDE framework for noise-robust free-water quantification | ✅ full model and trainer: [`rdtnet_baseline/`](rdtnet_baseline), [`qssm/models/rdt_net.py`](qssm/models/rdt_net.py), [`global_layer_rxn_diff.py`](qssm/models/global_layer_rxn_diff.py) | `python qssm/tests/test_shapes.py` builds it (509,383 params) |
+| RDT-Net accuracy vs classical AMICO fitting | 📄 evaluation code present: [`qssm/evaluate/`](qssm/evaluate) | numbers reported in the manuscript |
+| **QSSM**: 509K → 413K parameters (−18.9%), −12.2% FLOPs | 🔒 encoder withheld; the 2×2 design, cost benchmark and parameter budget are documented: [`docs/architecture.md`](docs/architecture.md), [`qssm/efficiency/`](qssm/efficiency) | `python qssm/efficiency/bench.py --cpu-only` (reproduces all four arms on the full code) |
+| QSSM beats the ViT baseline in a 2×2 ablation (Wilcoxon) | ✅ statistics protocol: [`qssm/stats/stats.py`](qssm/stats/stats.py) (exact Wilcoxon, 2×2 interaction, TOST, Holm) | p-values reported in the manuscript |
+| **Automated bundle segmentation** with TractSeg from FODs | ✅ complete pipelines: [`tractography/`](tractography) (FW correction → SS3T-CSD → TractSeg bundles, endings, TOMs) | runs on any HCP-style subject |
+| **Data scale & optimisation**: SLURM processing, adaptive-compute controller | ✅ SLURM array jobs, preprocessing, SNR-conditioned iteration controller: [`hpc/`](hpc) | throughput figures reported in the manuscript |
 
-âœ… code included Â· ðŸ“„ code included, needs data Â· ðŸ”’ withheld until publication ([WITHHELD.md](WITHHELD.md))
+✅ code included · 📄 code included, needs data · 🔒 withheld until publication ([WITHHELD.md](WITHHELD.md))
 
 Quick check with no data needed: `python scripts/setup_check.py`.
 
@@ -42,8 +42,8 @@ At a high level, the repository supports this end-to-end workflow:
 
 1. start from HCP multishell diffusion MRI,
 2. extract single-shell inputs (one b0 plus the b = 1000 shell),
-3. train the **RDT-Net** baseline (ViT encoder + reactionâ€“diffusion PDE decoder),
-4. train the **QSSM** encoder arms in a controlled 2Ã—2 factorial against it,
+3. train the **RDT-Net** baseline (ViT encoder + reaction–diffusion PDE decoder),
+4. train the **QSSM** encoder arms in a controlled 2×2 factorial against it,
 5. evaluate accuracy, noise robustness and statistical significance,
 6. apply the predicted free-water maps to **free-water-corrected tractography** and
    **TractSeg** white-matter bundle segmentation,
@@ -53,11 +53,11 @@ At a high level, the repository supports this end-to-end workflow:
 
 - **Q-space state-space encoder.** A selective scan across the gradient directions of
   each voxel, plus a spatial scan that replaces self-attention.
-- **Smaller and cheaper.** 509,383 â†’ 412,983 parameters (âˆ’18.9%) and âˆ’12.2% FLOPs
+- **Smaller and cheaper.** 509,383 → 412,983 parameters (−18.9%) and −12.2% FLOPs
   compared with the ViT baseline.
-- **Controlled 2Ã—2 design.** {attention, spatial scan} Ã— {no q-scan, q-scan}. Only the
+- **Controlled 2×2 design.** {attention, spatial scan} × {no q-scan, q-scan}. Only the
   encoder varies, so each effect is measured twice.
-- **Physics-informed decoder.** A reactionâ€“diffusion PDE decoder (RDT-Net) that
+- **Physics-informed decoder.** A reaction–diffusion PDE decoder (RDT-Net) that
   regularises the free-water map spatially.
 - **Downstream tractography.** Free-water-corrected FODs and TractSeg segmentation of
   72 white-matter bundles.
@@ -71,8 +71,8 @@ At a high level, the repository supports this end-to-end workflow:
 
 | Folder | Contents |
 |---|---|
-| [`qssm/`](qssm) | â˜… the research: encoder arms, evaluation, statistics, efficiency benchmark |
-| [`rdtnet_baseline/`](rdtnet_baseline) | RDT-Net, the ViT + reactionâ€“diffusion PDE baseline |
+| [`qssm/`](qssm) | ★ the research: encoder arms, evaluation, statistics, efficiency benchmark |
+| [`rdtnet_baseline/`](rdtnet_baseline) | RDT-Net, the ViT + reaction–diffusion PDE baseline |
 | [`tractography/`](tractography) | free-water-corrected CSD / SS3T-CSD tractography and TractSeg |
 | [`hpc/`](hpc) | DWI preprocessing, SLURM jobs, adaptive-compute controller, CUDA build |
 | [`scripts/`](scripts) | `setup_check.py`: first-run verification |
@@ -92,14 +92,14 @@ Start with these:
 | Build and check the models (no data) | `python qssm/tests/test_shapes.py` |
 | Parameter / FLOP table (no data) | `python qssm/efficiency/bench.py --cpu-only` |
 | Train RDT-Net | `python rdtnet_baseline/train_rxn_diff.py` |
-| Train a QSSM arm ðŸ”’ | `python qssm/train/train_mamba.py --encoder mamba` |
+| Train a QSSM arm 🔒 | `python qssm/train/train_mamba.py --encoder mamba` |
 | Evaluate checkpoints | `python qssm/evaluate/evaluate.py --all` |
 | Noise robustness | `python qssm/evaluate/evaluate_snr.py --all` |
 | Statistics | `python qssm/stats/stats.py --md results/stats.md` |
 | Tractography + TractSeg | `bash tractography/ss3t_tractseg/run_fw_tractseg.sh` |
 | Everything on SLURM | `sbatch hpc/slurm/train_arms.sbatch` (see [hpc/README.md](hpc/README.md)) |
 
-ðŸ”’ = placeholder in this release (see [WITHHELD.md](WITHHELD.md)).
+🔒 = placeholder in this release (see [WITHHELD.md](WITHHELD.md)).
 
 ## HCP Data Access
 
@@ -136,11 +136,11 @@ HCP multishell dMRI
              |        |
              |        +--> warm start
              |               |
-             +--> qssm/train/train_mamba.py ðŸ”’             A0 Â· A1 Â· A2 Â· A3 (QSSM)
+             +--> qssm/train/train_mamba.py 🔒             A0 · A1 · A2 · A3 (QSSM)
                       |
-                      +--> qssm/evaluate/                  MAE Â· SNR sweep
-                      +--> qssm/stats/                     Wilcoxon Â· 2Ã—2 Â· TOST Â· Holm
-                      +--> qssm/efficiency/                params Â· FLOPs Â· memory
+                      +--> qssm/evaluate/                  MAE · SNR sweep
+                      +--> qssm/stats/                     Wilcoxon · 2×2 · TOST · Holm
+                      +--> qssm/efficiency/                params · FLOPs · memory
                       |
                       +--> tractography/                   FW-corrected FODs -> TractSeg bundles
 ```
@@ -155,25 +155,25 @@ correction and T1 registration first.
 
 ### 2. Train the RDT-Net baseline
 
-RDT-Net is a ViT encoder followed by two reactionâ€“diffusion PDE blocks and a gated
+RDT-Net is a ViT encoder followed by two reaction–diffusion PDE blocks and a gated
 decoder. It is trained on single-shell DWI plus a Stage-I ANN free-water prior, with
 multishell ground truth as the target. See [rdtnet_baseline/README.md](rdtnet_baseline/README.md).
 
-### 3. Train the QSSM arms ðŸ”’
+### 3. Train the QSSM arms 🔒
 
 The four arms share the RDT-Net decoder and differ only in the encoder:
 
 |  | no q-scan | q-scan |
 |---|---|---|
-| **attention** | A0 Â· 509,383 params | A1 Â· 513,591 |
-| **spatial scan** | A2 Â· 408,775 | **A3 QSSM Â· 412,983** |
+| **attention** | A0 · 509,383 params | A1 · 513,591 |
+| **spatial scan** | A2 · 408,775 | **A3 QSSM · 412,983** |
 
 High-level design: [docs/architecture.md](docs/architecture.md).
 
 ### 4. Evaluate and test
 
-Per-subject free-water MAE on a held-out cohort, robustness across SNR 60 â†’ 10, and
-paired statistics: exact Wilcoxon signed-rank, the 2Ã—2 interaction, TOST equivalence for
+Per-subject free-water MAE on a held-out cohort, robustness across SNR 60 → 10, and
+paired statistics: exact Wilcoxon signed-rank, the 2×2 interaction, TOST equivalence for
 null claims, and Holm correction. See [qssm/README.md](qssm/README.md).
 
 ### 5. Tractography and bundle segmentation
@@ -186,31 +186,31 @@ endings and tract orientation maps. See [tractography/README.md](tractography/RE
 
 ```text
 ResearchWork/
-â”œâ”€â”€ qssm/
-â”‚   â”œâ”€â”€ models/          encoder arms, PDE decoder, selective-scan backends
-â”‚   â”œâ”€â”€ data/            training-data construction, Rician noise
-â”‚   â”œâ”€â”€ train/           trainer for all arms
-â”‚   â”œâ”€â”€ evaluate/        test-set MAE, SNR sweep, downstream analyses
-â”‚   â”œâ”€â”€ ablations/       pre-flight checks, component knockouts
-â”‚   â”œâ”€â”€ efficiency/      params / FLOPs / memory / latency
-â”‚   â”œâ”€â”€ stats/           statistical protocol
-â”‚   â”œâ”€â”€ tests/           data-free model test
-â”‚   â””â”€â”€ paths.py         environment-variable path resolution
-â”œâ”€â”€ rdtnet_baseline/     RDT-Net trainer
-â”œâ”€â”€ tractography/
-â”‚   â”œâ”€â”€ ss3t_tractseg/   SS3T-CSD + TractSeg pipeline
-â”‚   â””â”€â”€ csd_pipeline/    single-tissue CSD pipeline
-â”œâ”€â”€ hpc/
-â”‚   â”œâ”€â”€ preprocessing/   DWI preprocessing, shell extraction
-â”‚   â”œâ”€â”€ slurm/           sbatch templates
-â”‚   â”œâ”€â”€ adaptive_compute/  PDE-iteration controller
-â”‚   â””â”€â”€ env/             mamba-ssm CUDA build
-â”œâ”€â”€ scripts/             setup_check.py
-â”œâ”€â”€ docs/                architecture.md, data_layout.md
-â”œâ”€â”€ splits/              subject-list templates
-â”œâ”€â”€ .github/workflows/   CI
-â”œâ”€â”€ README.md Â· INSTALL.md Â· WITHHELD.md Â· CONFIDENTIALITY.md
-â””â”€â”€ CONTRIBUTING.md Â· CHANGELOG.md Â· CITATION.cff Â· LICENSE
+├── qssm/
+│   ├── models/          encoder arms, PDE decoder, selective-scan backends
+│   ├── data/            training-data construction, Rician noise
+│   ├── train/           trainer for all arms
+│   ├── evaluate/        test-set MAE, SNR sweep, downstream analyses
+│   ├── ablations/       pre-flight checks, component knockouts
+│   ├── efficiency/      params / FLOPs / memory / latency
+│   ├── stats/           statistical protocol
+│   ├── tests/           data-free model test
+│   └── paths.py         environment-variable path resolution
+├── rdtnet_baseline/     RDT-Net trainer
+├── tractography/
+│   ├── ss3t_tractseg/   SS3T-CSD + TractSeg pipeline
+│   └── csd_pipeline/    single-tissue CSD pipeline
+├── hpc/
+│   ├── preprocessing/   DWI preprocessing, shell extraction
+│   ├── slurm/           sbatch templates
+│   ├── adaptive_compute/  PDE-iteration controller
+│   └── env/             mamba-ssm CUDA build
+├── scripts/             setup_check.py
+├── docs/                architecture.md, data_layout.md
+├── splits/              subject-list templates
+├── .github/workflows/   CI
+├── README.md · INSTALL.md · WITHHELD.md · CONFIDENTIALITY.md
+└── CONTRIBUTING.md · CHANGELOG.md · CITATION.cff · LICENSE
 ```
 
 ## Setup
@@ -290,7 +290,7 @@ will be released on publication.
 ## Notes
 
 - This repository does not include HCP data, patient data, checkpoints or generated outputs.
-- ðŸ”’ files are placeholders until publication. Calling them raises a clear
+- 🔒 files are placeholders until publication. Calling them raises a clear
   "withheld" error rather than failing silently.
 - This is a portfolio snapshot, not a supported software release.
 
@@ -307,6 +307,3 @@ Neuroscience at Washington University.
 
 Source code: [MIT](LICENSE). The license does not cover data, withheld components or
 unpublished results (see [CONFIDENTIALITY.md](CONFIDENTIALITY.md)).
-  
- 
- 
