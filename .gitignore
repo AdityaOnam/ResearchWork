@@ -1,0 +1,57 @@
+# ── Never commit data, weights or outputs ─────────────────────────────
+data/
+checkpoints/
+results/
+logs/
+cache/
+tractography_results/
+*.nii
+*.nii.gz
+*.mif
+*.mif.gz
+*.tck
+*.trk
+*.vtk
+*.pt
+*.pth
+*.ckpt
+*.npy
+*.npz
+*.h5
+*.hdf5
+*.mat
+*.zip
+*.tar
+*.tar.gz
+bvals
+bvecs
+*.bval
+*.bvec
+
+# Subject lists are local (the example template is tracked)
+splits/*.txt
+!splits/example.txt
+
+# Local configuration
+.env
+*.env
+!*.env.example
+hpc/adaptive_compute/config/local_*.yaml
+
+# ── Python / tooling ──────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.idea/
+.vscode/
+.DS_Store
+*.log
+*.out
+*.err
+slurm-*.out

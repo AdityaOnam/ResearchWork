@@ -1,0 +1,166 @@
+# ============================================================
+# RL_MODEL — Default Configuration
+# Physics-Informed Coarse-to-Fine Iterative Anatomical
+# Reconstruction using PPO-Controlled PDE Refinement
+# ============================================================
+#   - ViT capacity: 64→128 embed_dim, 4→8 depth, 8→16 heads
+#   - K_outer: 2→8 (progressive coarse-to-fine)
+#   - Reverse extreme-noise curriculum for RL phase
+#   - Enhanced PPO rewards (SSIM, edge, hallucination, consistency)
+#   - Train/validation split (80/20)
+#   - Validation-driven checkpointing
+#   - PDE stability improvements
+
+# --- Paths ---
+# Two profiles: "hpc" (the SLURM cluster) and "local" (a workstation).
+# Replace every /path/to/... placeholder before training.
+paths:
+  hpc:
+    signal_root: "/path/to/data/Original_Data"
+    gt_fw_root: "/path/to/data/FWE"
+    gt_icvf_root: "/path/to/data/SMT_GT_train"
+    fc_pred_root: "/path/to/ann_priors/tissue_ic"
+    pretrained_ann: "/path/to/checkpoints/best_model_91_direction.pth"
+    pretrained_vit_rxn: "/path/to/checkpoints/VIT_pde_K5_Rxn_diff.pth"
+    output_dir: "/path/to/outputs/adaptive_compute"
+  local:
+    dataset_root: "/path/to/Dataset"
+    model_root: "/path/to/pretrained_models"
+    output_dir: "./checkpoints"
+
+# --- Data ---
+data:
+  target_H: 174
+  target_W: 145
+  num_dwi_volumes: 91
+  b_value: 1000.0
+  eps_b0: 1.0e-10
+  num_workers: 0
+  val_split: 0.2
+  split_seed: 42
+
+# --- Noise ---
+noise:
+  types: ["rician"]
+  # Warmup curriculum (unchanged: low-to-moderate)
+  curriculum:
+    epoch_ranges: [[1, 10], [11, 20], [21, 30]]
+    noise_levels: [20.0, 10.0, 5.0]
+    adaptive_after_epoch: 60
+  # RL phase: reverse extreme-noise curriculum (high-to-zero)
+  rl_curriculum:
+    epoch_ranges: [[1, 5], [6, 10], [11, 15], [16, 20], [21, 25],
+                   [26, 30], [31, 35], [36, 40], [41, 45], [46, 50],
+                   [51, 55], [56, 60], [61, 65]]
+    noise_levels: [0.1, 1.0, 5.0, 10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0]
+
+# --- ANN Prior ---
+ann_prior:
+  input_dim: 91
+  hidden_layers: 2
+  output_dim: 2
+
+# --- ViT ---
+vit:
+  embed_dim: 128
+  patch_size: 4
+  depth: 8
+  num_heads: 16
+  mlp_ratio: 4.0
+  in_channels: 93
+
+# --- PDE ---
+pde:
+  K_inner: 3
+  dt_min: 0.005
+  dt_max: 0.03
+  constant_Dxy: true
+  nonlinear_pde: true
+  tissue_adaptive: true
+  dw_kernel_size: 3
+  init_gain: 0.1
+
+# --- Iterative Refinement ---
+iterative:
+  K_outer: 8
+  K_outer_max: 10
+  deep_supervision: true
+  deep_supervision_weight: 0.3
+
+# --- Decoder ---
+decoder:
+  base_ch: 128
+  n_refine: 3
+  se_reduction: 8
+  dual_head: true
+
+# --- RL ---
+rl:
+  algorithm: "PPO"
+  action_dim: 3
+  feature_dim: 128
+  hidden_dim: 256
+  gamma: 0.99
+  clip_eps: 0.2
+  lr_policy: 3.0e-4
+  lr_critic: 1.0e-3
+  ppo_epochs: 4
+  entropy_coeff: 0.02
+  value_loss_coeff: 0.5
+  max_grad_norm_rl: 0.5
+
+# --- Reward ---
+reward:
+  w_fw: 1.0
+  w_icvf: 1.0
+  w_ssim: 0.5
+  w_edge: 0.4
+  w_continuity: 0.3
+  w_hallucination: 0.5
+  w_consistency: 0.3
+  w_instability: 0.3
+  w_artifact: 0.2
+
+# --- Loss ---
+loss:
+  lambda_fw: 1.0
+  lambda_icvf: 1.0
+  lambda_sobel: 0.1
+  lambda_rl: 0.05
+  lambda_aux: 0.3
+
+# --- Training ---
+training:
+  warmup:
+    epochs: 30
+    lr: 5.0e-5
+    batch_size: 1
+    weight_decay: 1.0e-5
+    use_grad_clip: true
+    max_grad_norm: 0.5
+    scheduler: "cosine"
+    eta_min: 1.0e-7
+  rl_phase:
+    epochs: 65
+    lr_model: 2.0e-5
+    batch_size: 1
+    rl_update_freq: 5
+    alternate_steps: true
+  validation:
+    run_every_epoch: true
+    save_predictions: true
+    save_visualizations: true
+  checkpointing:
+    save_every_n_epochs: 5
+    keep_best: true
+    keep_last: true
+
+# --- Evaluation ---
+evaluation:
+  metrics: ["fw_mae", "icvf_mae", "fa_consistency", "md_consistency"]
+  robustness_tests:
+    low_directions: [15, 30, 45, 60, 91]
+    noise_levels: [1.0, 5.0, 20.0, 50.0, 100.0]
+  cross_scanner: ["BTC", "MGH"]
+
+seed: 42

@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+      - name: Install (CPU-only torch)
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install numpy scipy nibabel timm tqdm dipy pyyaml matplotlib
+      - name: Byte-compile every script
+        run: python -m compileall -q .
+      - name: Shell syntax
+        run: for f in $(git ls-files '*.sh' '*.sbatch'); do bash -n "$f"; done
+      - name: Model build test (no data)
+        run: python qssm/tests/test_shapes.py
+      - name: Static cost benchmark
+        run: python qssm/efficiency/bench.py --cpu-only
+      - name: No data or weights committed
+        run: |
+          if git ls-files | grep -E '\.(nii|nii\.gz|mif|tck|trk|pt|pth|ckpt|npy|npz|h5)$'; then
+            echo "Data or weight files are tracked. Remove them."; exit 1; fi

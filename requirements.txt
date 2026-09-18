@@ -1,0 +1,22 @@
+# Core (training, evaluation, tests)
+torch>=2.1
+numpy>=1.24
+scipy>=1.10
+nibabel>=5.0
+timm>=0.9
+tqdm>=4.65
+
+# Evaluation: downstream FA/MD after free-water correction
+dipy>=1.7
+
+# Adaptive-compute controller (hpc/adaptive_compute)
+pyyaml>=6.0
+matplotlib>=3.7
+
+# Optional — fused CUDA selective-scan kernel (~28x faster than the pure-PyTorch
+# fallback; identical weights). Needs a CUDA toolchain matching your GPU; see INSTALL.md.
+# mamba-ssm>=2.2
+# causal-conv1d>=1.4
+
+# Tractography (installed separately, not via pip): MRtrix3, MRtrix3Tissue (SS3T-CSD),
+# FSL + ANTs (preprocessing). TractSeg: pip install TractSeg

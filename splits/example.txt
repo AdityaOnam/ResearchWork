@@ -1,0 +1,5 @@
+# One subject ID per line; '#' starts a comment.
+# Copy this file to train.txt / test.txt / external.txt and list your own subjects.
+# Folder names under $QSSM_TRAIN_SIGNAL / $QSSM_TEST_ROOT must match these IDs.
+SUBJECT_ID_1
+SUBJECT_ID_2

@@ -1,0 +1,20 @@
+# Finalize authors, repository URL and DOI before making the repository public.
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "QSSM: Q-Space Selective-Scan Models for Free-Water Estimation in Diffusion MRI"
+type: software
+authors:
+  - family-names: "Onam"
+    given-names: "Aditya"
+    affiliation: "Indian Institute of Technology Patna"
+version: 0.1.0
+date-released: 2026-09-18
+license: MIT
+repository-code: "https://github.com/AdityaOnam/ResearchWork"
+keywords:
+  - diffusion MRI
+  - free-water estimation
+  - state-space models
+  - Mamba
+  - physics-informed deep learning
+  - tractography
